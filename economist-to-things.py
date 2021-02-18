@@ -4,61 +4,83 @@ import json
 import webbrowser
 
 
-def get_articles(response_text):
-    articles = {}
+def get_articles(response):
+    """
+    Get Article headings from GET request response
 
-    soup = BeautifulSoup(response_text, 'lxml')
-    sections1 = soup.find_all('section', attrs={"class": "layout-weekly-edition-section ds-layout-grid"})
-    sections2 = soup.find_all('section', attrs={"class": "layout-weekly-edition-section layout-weekly-edition-section--cols ds-layout-grid"})
+    Parameters
+    ----------
+    response_text : requests.Response
+       GET request response from The Economist weekly link 
+
+    Returns
+    -------
+    articles : dict { heading : articles[] }
+    """
+
+    articles = {}
+    soup = BeautifulSoup(response.text, 'lxml')
+
+    # Find articles in sections LEADERS and BRIEFING
+    SECTIONS_CLASS_1 = 'layout-weekly-edition-section ds-layout-grid'
+    ARTICLES_CLASS_1 = 'teaser__headline teaser__headline--sc3'
+
+    sections1 = soup.find_all('section', attrs={"class": SECTIONS_CLASS_1})
 
     for section in sections1:
         if section.h2.text == 'Leaders':
             articles['Leaders'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc3"})
+                section.find_all(attrs={'class': ARTICLES_CLASS_1})
         elif section.h2.text == 'Briefing':
             articles['Briefing'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc3"})
+                section.find_all(attrs={'class': ARTICLES_CLASS_1})
 
+    # Find articles in other sections
+    SECTIONS_CLASS_2 = \
+        'layout-weekly-edition-section layout-weekly-edition-section--cols ds-layout-grid'
+    ARTICLES_CLASS_2 = 'teaser__headline teaser__headline--sc1'
+
+    sections2 = soup.find_all('section', attrs={"class": SECTIONS_CLASS_2 })
     for section in sections2:
         if section.h2.text == 'Britain':
             articles['Britain'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Europe':
             articles['Europe'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'United States':
             articles['United States'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Middle East & Africa':
             articles['Middle East & Africa'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'The Americas':
             articles['The Americas'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Asia':
             articles['Asia'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'China':
             articles['China'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'International':
             articles['International'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Special report':
             articles['Special report'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Business':
             articles['Business'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Finance & economics':
             articles['Finance & economics'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Science & technology':
             articles['Science & technology'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
         elif section.h2.text == 'Graphic detail':
             articles['Graphic detail'] = \
-            section.find_all(attrs={"class": "teaser__headline teaser__headline--sc1"})
+                section.find_all(attrs={"class": ARTICLES_CLASS_2})
 
     return articles
 
@@ -103,7 +125,14 @@ def add_to_things(articles):
             webbrowser.open(url)
 
 
-url = input("The Weekly Economist Link: ")
-response = requests.get(url)
-articles = get_articles(response.text)
-add_to_things(articles)
+def main():
+    url = input('The Weekly Economist Link: ')
+
+    # Sends a GET request to the url provided
+    response = requests.get(url)
+
+    articles = get_articles(response)
+    add_to_things(articles)
+
+if __name__ == '__main__':
+    main()
