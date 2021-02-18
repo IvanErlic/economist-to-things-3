@@ -1,12 +1,12 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 import webbrowser
+from bs4 import BeautifulSoup
 
 
 def get_articles(response):
     """
-    Get Article headings from GET request response
+    Get Article headings from GET request response.
 
     Parameters
     ----------
@@ -84,8 +84,38 @@ def get_articles(response):
 
     return articles
 
+
+def add_to_things(articles):
+    """
+    Adds articles to Things 3.
+
+    Parameters
+    ----------
+    articles : dict { heading : articles[] }
+
+    Returns
+    -------
+    None
+    """
+
+    # Add "The world this week"
+    webbrowser.open('things:///add?title='
+                    'Politics%20this%20week&list=The%20Economist')
+    webbrowser.open('things:///add?title='
+                    'Business%20this%20week&list=The%20Economist')
+
+    # Add the other sections
+    for heading, section in articles.items():
+        for article in section:
+            title = article.text.replace(" ", "%20")
+            title = title.replace("’", "'")
+            url = (f'things:///add?title={title}'
+                   f'&list=The%20Economist&heading={things_heading(heading)}')
+            webbrowser.open(url)
+
+
 def things_heading(economist_heading):
-    '''retuns heading formated for Things 3'''
+    """Returns headings formated for Things 3"""
     
     headings = {
         'Leaders': 'Leaders',
@@ -107,22 +137,8 @@ def things_heading(economist_heading):
 
     # Replace _ with %20
     headings = {k:v.replace(" ", "%20") for (k,v) in headings.items()}
-
+    
     return headings.get(economist_heading)
-
-def add_to_things(articles):
-
-    # Add The world this week
-    webbrowser.open('things:///add?title=Politics%20this%20week&list=The%20Economist')
-    webbrowser.open('things:///add?title=Business%20this%20week&list=The%20Economist')
-
-    for heading, section in articles.items():
-        for article in section:
-            title = article.text.replace(" ", "%20")
-            title = title.replace("’", "'")
-            url = \
-            f'things:///add?title={title}&list=The%20Economist&heading={things_heading(heading)}'
-            webbrowser.open(url)
 
 
 def main():
@@ -131,7 +147,10 @@ def main():
     # Sends a GET request to the url provided
     response = requests.get(url)
 
+    # Gets articles from the response
     articles = get_articles(response)
+
+    # Add the articles to Things 3
     add_to_things(articles)
 
 if __name__ == '__main__':
